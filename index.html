@@ -26,7 +26,7 @@ textarea{min-height:65px;resize:vertical}
 .statuses button,.actions button{border:1px solid #cbd3df;border-radius:99px;padding:9px 5px;font-weight:700;background:#f8fafc;color:#273449;cursor:pointer}
 .statuses button.active[data-v="Conforme"]{background:#ccebd4;border-color:#62b77a}
 .statuses button.active[data-v="Não Conforme"]{background:#ffd4d8;border-color:#ec929c}
-.statuses button.active[data-v="N/A"]{background:#e2e5e9;border-color:#aeb5bf}
+.statuses button.active[data-v="Não se aplica"]{background:#e2e5e9;border-color:#aeb5bf}
 .note{margin-top:8px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .actions button{padding:12px;border-radius:9px}
@@ -50,7 +50,7 @@ footer{text-align:center;padding:15px;color:#64748b;font-size:0.85rem;margin-top
 </div>
 <div style="margin-top:14px;font-weight:750"><span id="count">0 de 29 itens avaliados</span></div>
 <div class="progress"><div id="bar"></div></div>
-<div class="small">Marque Conforme, Não Conforme ou N/A. Registre os defeitos no campo de observações.</div>
+<div class="small">Marque Conforme, Não Conforme ou Não se aplica. Registre os defeitos no campo de observações.</div>
 </section>
 <div id="checklist"></div>
 <section class="card">
@@ -120,7 +120,7 @@ groups.forEach(([group,items])=>{
  const h=document.createElement('h2');h.className='group-title';h.textContent=group;section.appendChild(h);
  items.forEach(([code,name,desc])=>{
   const item=document.createElement('div');item.className='item';item.dataset.code=code;item.dataset.name=name;item.dataset.desc=desc;
-  item.innerHTML=`<div class="item-top"><span class="code">${code}</span><div class="item-name">${name}</div></div><div class="item-desc">${desc}</div><div class="statuses">${['Conforme','Não Conforme','N/A'].map(v=>`<button type="button" data-v="${v}" aria-pressed="false">${v}</button>`).join('')}</div><div class="note"><label>Observações / pendências</label><input class="obs" placeholder="Ex.: peça quebrada, vazamento..." /></div>`;
+  item.innerHTML=`<div class="item-top"><span class="code">${code}</span><div class="item-name">${name}</div></div><div class="item-desc">${desc}</div><div class="statuses">${['Conforme','Não Conforme','Não se aplica'].map(v=>`<button type="button" data-v="${v}" aria-pressed="false">${v}</button>`).join('')}</div><div class="note"><label>Observações / pendências</label><input class="obs" placeholder="Ex.: peça quebrada, vazamento..." /></div>`;
   item.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{item.querySelectorAll('button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false')});btn.classList.add('active');btn.setAttribute('aria-pressed','true');update()}));
   item.querySelector('.obs').addEventListener('input',update);
   section.appendChild(item);
