@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Checklist de Inspeção — Frota 852</title>
+<title>Checklist de Inspeção de Frota</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182235;background:#f3f5f8}
 *{box-sizing:border-box}body{margin:0;padding:14px;max-width:900px;margin-inline:auto}
@@ -23,17 +23,18 @@ textarea{min-height:65px;resize:vertical}
 .item-name{font-weight:700;line-height:1.3;flex:1}
 .item-desc{font-size:.86rem;color:#526071;margin:7px 0 10px}
 .statuses{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.statuses button,.actions button{border:1px solid #cbd3df;border-radius:9px;padding:9px 5px;font-weight:700;background:#f8fafc;color:#273449}
+.statuses button,.actions button{border:1px solid #cbd3df;border-radius:99px;padding:9px 5px;font-weight:700;background:#f8fafc;color:#273449;cursor:pointer}
 .statuses button.active[data-v="Conforme"]{background:#ccebd4;border-color:#62b77a}
 .statuses button.active[data-v="Não Conforme"]{background:#ffd4d8;border-color:#ec929c}
 .statuses button.active[data-v="N/A"]{background:#e2e5e9;border-color:#aeb5bf}
 .note{margin-top:8px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.actions button{padding:12px}
+.actions button{padding:12px;border-radius:9px}
 .primary{background:#17345b!important;color:white!important;border-color:#17345b!important}
 .small{font-size:.8rem;color:#687589}
+footer{text-align:center;padding:15px;color:#64748b;font-size:0.85rem;margin-top:20px;border-top:1px solid #e2e8f0}
 @media(max-width:520px){body{padding:9px}.fields{grid-template-columns:1fr}.statuses button{font-size:.82rem}.actions{grid-template-columns:1fr}}
-@media print{body{background:white;max-width:none}.actions{display:none}.card,.item{box-shadow:none;break-inside:avoid}header{background:#17345b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+@media print{body{background:white;max-width:none}.actions{display:none}.card,.item{box-shadow:none;break-inside:avoid}header{background:#17345b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}footer{border-top:none}}
 </style>
 </head>
 <body>
@@ -43,8 +44,8 @@ textarea{min-height:65px;resize:vertical}
 </header>
 <section class="card">
 <div class="fields">
-<div><label for="responsavel">Colaborador responsável</label><input id="responsavel" value="David" autocomplete="name"></div>
-<div><label for="frota">Frota</label><input id="frota" value="852"></div>
+<div><label for="responsavel">Colaborador responsável</label><input id="responsavel" value="" placeholder="Digite o nome..." autocomplete="name"></div>
+<div><label for="frota">Frota / Veículo</label><input id="frota" value="" placeholder="Ex: 852"></div>
 <div><label for="data">Data da inspeção</label><input id="data" type="date"></div>
 </div>
 <div style="margin-top:14px;font-weight:750"><span id="count">0 de 29 itens avaliados</span></div>
@@ -63,6 +64,11 @@ textarea{min-height:65px;resize:vertical}
 <button onclick="shareSummary()">Compartilhar resumo</button>
 </section>
 <p class="small">Importante: os dados são guardados localmente neste navegador. Para compartilhar o mesmo checklist entre pessoas/aparelhos e centralizar respostas, publique-o numa plataforma online com armazenamento compartilhado.</p>
+
+<footer>
+  Sistema desenvolvido por <strong>David</strong>
+</footer>
+
 <script>
 const groups = [
 ["01 - VISÃO GERAL",[
@@ -105,9 +111,10 @@ const groups = [
 ["09.05","Cabos","CABOS: LUBRIFICAR CABO DA EMBREAGEM, CABO DO FREIO E CABO DO ACELERADOR"],
 ["09.06","Balanças","BALANÇAS: LUBRIFICAR ROLAMENTOS DAS BALANÇAS"]]]
 ];
-const originalDefaults={"01.02":["Não Conforme","QUEBRADO"],"03.02":["Não Conforme","VAZAMENTO NO CABEÇOTE"],"08.01":["Não Conforme","VELOCÍMETRO NÃO FUNCIONA"],"08.02":["Não Conforme","FAROL QUEIMADO"],"08.03":["Não Conforme",""],"08.04":["Não Conforme",""]};
+
 const total=groups.reduce((n,g)=>n+g[1].length,0);
 const root=document.getElementById('checklist');
+
 groups.forEach(([group,items])=>{
  const section=document.createElement('section');section.className='card';
  const h=document.createElement('h2');h.className='group-title';h.textContent=group;section.appendChild(h);
@@ -119,14 +126,90 @@ groups.forEach(([group,items])=>{
   section.appendChild(item);
  });root.appendChild(section);
 });
+
 document.getElementById('data').value=new Date().toISOString().slice(0,10);
-function update(){let done=0;document.querySelectorAll('.item').forEach(i=>{if(i.querySelector('.active'))done++});document.getElementById('count').textContent=`${done} de ${total} itens avaliados`;document.getElementById('bar').style.width=(done/total*100)+'%';save()}
-function save(){try{const data={responsavel:document.getElementById('responsavel').value,frota:document.getElementById('frota').value,data:document.getElementById('data').value,geral:document.getElementById('geral').value,items:[...document.querySelectorAll('.item')].map(i=>({code:i.dataset.code,status:i.querySelector('.active')?.dataset.v||'',obs:i.querySelector('.obs').value}))};localStorage.setItem('frotaChecklist852',JSON.stringify(data))}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('frotaChecklist852')||'null');if(!d)return;['responsavel','frota','data','geral'].forEach(k=>{if(d[k]!==undefined)document.getElementById(k).value=d[k]});(d.items||[]).forEach(x=>{const i=[...document.querySelectorAll('.item')].find(el=>el.dataset.code===x.code);if(!i)return;const b=[...i.querySelectorAll('button')].find(el=>el.dataset.v===x.status);if(b){b.classList.add('active');b.setAttribute('aria-pressed','true')}i.querySelector('.obs').value=x.obs||''});update()}catch(e){}}
+
+function update(){
+ let done=0;
+ document.querySelectorAll('.item').forEach(i=>{if(i.querySelector('.active'))done++});
+ document.getElementById('count').textContent=`${done} de ${total} itens avaliados`;
+ document.getElementById('bar').style.width=(done/total*100)+'%';
+ save();
+}
+
+function save(){
+ try{
+  const data={
+   responsavel:document.getElementById('responsavel').value,
+   frota:document.getElementById('frota').value,
+   data:document.getElementById('data').value,
+   geral:document.getElementById('geral').value,
+   items:[...document.querySelectorAll('.item')].map(i=>({code:i.dataset.code,status:i.querySelector('.active')?.dataset.v||'',obs:i.querySelector('.obs').value}))
+  };
+  localStorage.setItem('frotaChecklistGeral',JSON.stringify(data));
+ }catch(e){}
+}
+
+function load(){
+ try{
+  const d=JSON.parse(localStorage.getItem('frotaChecklistGeral')||'null');
+  if(!d)return;
+  ['responsavel','frota','data','geral'].forEach(k=>{if(d[k]!==undefined)document.getElementById(k).value=d[k]});
+  (d.items||[]).forEach(x=>{
+   const i=[...document.querySelectorAll('.item')].find(el=>el.dataset.code===x.code);
+   if(!i)return;
+   const b=[...i.querySelectorAll('button')].find(el=>el.dataset.v===x.status);
+   if(b){b.classList.add('active');b.setAttribute('aria-pressed','true')}
+   i.querySelector('.obs').value=x.obs||''
+  });
+  update();
+ }catch(e){}
+}
+
 ['responsavel','frota','data','geral'].forEach(k=>document.getElementById(k).addEventListener('input',save));
-function exportCSV(){const rows=[['Código','Grupo','Item','Status','Observações','Responsável','Frota','Data']];document.querySelectorAll('.item').forEach(i=>{rows.push([i.dataset.code,i.closest('.card').querySelector('h2').textContent,i.dataset.name,i.querySelector('.active')?.dataset.v||'Não avaliado',i.querySelector('.obs').value,document.getElementById('responsavel').value,document.getElementById('frota').value,document.getElementById('data').value])});const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));a.download='checklist_frota_'+document.getElementById('frota').value+'.csv';a.click();URL.revokeObjectURL(a.href)}
-function clearAll(){if(!confirm('Apagar todas as respostas deste aparelho?'))return;document.querySelectorAll('.item').forEach(i=>{i.querySelectorAll('button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false')});i.querySelector('.obs').value=''});document.getElementById('geral').value='';update()}
-async function shareSummary(){const lines=[`Checklist Frota ${document.getElementById('frota').value}`,`Responsável: ${document.getElementById('responsavel').value}`,`Data: ${document.getElementById('data').value}`];document.querySelectorAll('.item').forEach(i=>{const s=i.querySelector('.active')?.dataset.v||'Não avaliado';const o=i.querySelector('.obs').value;lines.push(`${i.dataset.code} ${i.dataset.name}: ${s}${o?' — '+o:''}`)});if(document.getElementById('geral').value)lines.push('Observações gerais: '+document.getElementById('geral').value);const txt=lines.join('\n');try{if(navigator.share)await navigator.share({title:'Checklist de inspeção',text:txt});else{await navigator.clipboard.writeText(txt);alert('Resumo copiado. Cole no WhatsApp ou onde preferir.')}}catch(e){}}
+
+function exportCSV(){
+ const rows=[['Código','Grupo','Item','Status','Observações','Responsável','Frota','Data']];
+ document.querySelectorAll('.item').forEach(i=>{
+  rows.push([i.dataset.code,i.closest('.card').querySelector('h2').textContent,i.dataset.name,i.querySelector('.active')?.dataset.v||'Não avaliado',i.querySelector('.obs').value,document.getElementById('responsavel').value,document.getElementById('frota').value,document.getElementById('data').value])
+ });
+ const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));
+ a.download='checklist_frota_'+(document.getElementById('frota').value||'geral')+'.csv';
+ a.click();
+ URL.revokeObjectURL(a.href);
+}
+
+function clearAll(){
+ if(!confirm('Apagar todas as respostas deste aparelho?'))return;
+ document.querySelectorAll('.item').forEach(i=>{
+  i.querySelectorAll('button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false')});
+  i.querySelector('.obs').value=''
+ });
+ document.getElementById('responsavel').value='';
+ document.getElementById('frota').value='';
+ document.getElementById('geral').value='';
+ localStorage.removeItem('frotaChecklistGeral');
+ update();
+}
+
+async function shareSummary(){
+ const lines=[`Checklist Frota: ${document.getElementById('frota').value||'Não informada'}`,`Responsável: ${document.getElementById('responsavel').value||'Não informado'}`,`Data: ${document.getElementById('data').value}`];
+ document.querySelectorAll('.item').forEach(i=>{
+  const s=i.querySelector('.active')?.dataset.v||'Não avaliado';
+  const o=i.querySelector('.obs').value;
+  lines.push(`${i.dataset.code} ${i.dataset.name}: ${s}${o?' — '+o:''}`)
+ });
+ if(document.getElementById('geral').value)lines.push('Observações gerais: '+document.getElementById('geral').value);
+ const txt=lines.join('\n');
+ try{
+  if(navigator.share)await navigator.share({title:'Checklist de inspeção',text:txt});
+  else{await navigator.clipboard.writeText(txt);alert('Resumo copiado. Cole no WhatsApp ou onde preferir.')}
+ }catch(e){}
+}
+
 load();
 </script>
-</body></html>
+</body>
+</html>
